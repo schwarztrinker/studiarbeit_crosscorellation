@@ -109,7 +109,7 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     return plotRow
 
 
-def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings):
+def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname):
     plt.close("all")
     """ Calculate the cross correlation between to sequences. """
     seqA = np.asarray(seqA)
@@ -144,10 +144,10 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings):
     gs = GridSpec(numberOfRowsToPlot, 2, figure=figure)
     ax = figure.add_subplot(gs[currentPlotRow, 0])
     ax.plot(seqA, 'ro', rasterized=RASTERIZE_PLOTS, markersize=1)
-    ax.set_title('Raw data: Sequence A')
+    ax.set_title(seqAname)
     ax = figure.add_subplot(gs[currentPlotRow, 1])
     ax.plot(seqB, 'ro', rasterized=RASTERIZE_PLOTS, markersize=1)
-    ax.set_title('Raw data: Sequence B')
+    ax.set_title(seqBname)
     currentPlotRow += 1
 
     # Plotting the normalized data:

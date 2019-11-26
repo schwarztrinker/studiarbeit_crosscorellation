@@ -1,10 +1,16 @@
 import crosscorrelation.settings as crossSettings
 import crosscorrelation.functions_crosscorrelation as fcc
+import analysationrequest.request as catData
 
+from analysationrequest.request import AnalysationRequest
 
-def executeCrossCorrelationForDatasets(datasets: []):
+def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
+    return metadataDictionary.get(key, '')
+
+def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest):
     """ Iterates the datasets and calaculates the cross correlation
-        for suitable sequences """
+        for suitable sequences """   
+   
     for dataset in datasets:
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
@@ -21,14 +27,25 @@ def executeCrossCorrelationForDatasets(datasets: []):
                               "ignored. Sequence-Length not equal!")
                         continue
                     # Print information and create the export file path:
+                    metaDataInfo = dataset.metadataDictionaries[firstIndex]
+                    titlePostfixFirst = \
+                            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
+                    metaDataInfo = dataset.metadataDictionaries[secondIdx]
+                    titlePostfixSecond = \
+                            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
                     print(dataset.fileName,
                           "exporting Cross-Correlation between sequence",
-                          str(firstIndex), "and", str(secondIdx))
+                          str(titlePostfixFirst), "and", str(titlePostfixSecond))
                     exportPath = dataset.fileName.replace(
                         ".csv",  "_CrossCorrelation_Sequence_" +
-                        str(firstIndex)
-                        + "_Sequence_" + str(secondIdx) + ".pdf")
+                        str(titlePostfixFirst)
+                        + "_Sequence_" + str(titlePostfixSecond) + ".pdf")
 
+                    startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
+                    endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
+
+                    titlePostfixFirst = startTime + ' ' + titlePostfixFirst
+                    titlePostfixSecond = endTime + ' ' + titlePostfixSecond
                     # If you want to adjust the settings and plot a lot of 
                     # information, it is recommended to disable the pdf generation
                     # and only to draw the results. Then choose the settings you need
@@ -40,4 +57,4 @@ def executeCrossCorrelationForDatasets(datasets: []):
                     correlationSettings.drawResults = False
                     # Execute the cross correlation:
                     fcc.crossCorrelation(firstSequence, secondSequence,
-                                         correlationSettings)
+                                         correlationSettings, str(titlePostfixFirst), str(titlePostfixSecond))
