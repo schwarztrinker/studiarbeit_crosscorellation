@@ -1,0 +1,2 @@
+Execute the following command to install the needed dependencies:
+pip install numpy matplotlib
