@@ -33,16 +33,19 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest):
                     metaDataInfo = dataset.metadataDictionaries[secondIdx]
                     titlePostfixSecond = \
                             extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
+
+                    startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
+                    endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
+
                     print(dataset.fileName,
                           "exporting Cross-Correlation between sequence",
                           str(titlePostfixFirst), "and", str(titlePostfixSecond))
                     exportPath = dataset.fileName.replace(
                         ".csv",  "_CrossCorrelation_Sequence_" +
                         str(titlePostfixFirst)
-                        + "_Sequence_" + str(titlePostfixSecond) + ".pdf")
+                        + "_Sequence_" + str(titlePostfixSecond) + '_' +str(startTime) +".pdf")
 
-                    startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
-                    endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
+                    
 
                     titlePostfixFirst = startTime + ' ' + titlePostfixFirst
                     titlePostfixSecond = endTime + ' ' + titlePostfixSecond
