@@ -1,3 +1,4 @@
 *.pdf
 *.csv
 sourceFiles/
+*.pyc
