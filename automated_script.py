@@ -48,7 +48,7 @@ def executedForFolderPath(path):
         # Execute the categorization: Calculating the balance, frequency:
         # Set the second parameter to True if you want to show the results in a
         # Matplotlib window:
-        executeCategorization(requests, False)
+        # executeCategorization(requests, False)
         # This will calculate the cross correlation between sequences in the same
         # source file. Additionally, the sequences must have the same length.
         executeCrossCorrelationForDatasets(requests)

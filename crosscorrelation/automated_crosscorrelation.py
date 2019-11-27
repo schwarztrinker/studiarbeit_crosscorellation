@@ -47,8 +47,8 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest):
 
                     
 
-                    titlePostfixFirst = startTime + ' ' + titlePostfixFirst
-                    titlePostfixSecond = endTime + ' ' + titlePostfixSecond
+                    titlePostfixFirst = 'S:' + startTime + ' ' + titlePostfixFirst
+                    titlePostfixSecond = titlePostfixSecond + ' E:' +endTime
                     # If you want to adjust the settings and plot a lot of 
                     # information, it is recommended to disable the pdf generation
                     # and only to draw the results. Then choose the settings you need

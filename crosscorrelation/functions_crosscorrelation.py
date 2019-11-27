@@ -83,7 +83,7 @@ def plotCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=False,
-             usevlines=False, maxlags=300, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
+             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
     ax.grid(True)
     ax.axhline(0, color='black',  linewidth=1, zorder=1)
     plotRow += 1
@@ -102,7 +102,7 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=300, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
+             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
     ax.grid(True)
     ax.axhline(0, color='black',  linewidth=1, zorder=1)
     plotRow += 1
