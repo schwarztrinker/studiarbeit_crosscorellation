@@ -4,3 +4,7 @@ sourceFiles/
 *.pyc
 *.bak
 categorization/__pycache__/
+
+analysationrequest/__pycache__/
+
+crosscorrelation/__pycache__/
