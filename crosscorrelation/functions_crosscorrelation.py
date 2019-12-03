@@ -5,13 +5,17 @@ import crosscorrelation.settings as crossSettings
 
 RASTERIZE_PLOTS = True
 
-#X VALUE
+
+# X VALUE
 def getXValueOfMax(seqA, seqB):
-    xArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[0]
-    yArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[1]
+    xArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[
+        0]
+    yArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[
+        1]
 
+    destination: int = yArray.tolist().index(returnMaxResultValue(seqA, seqB))
 
-    destination = yArray.tolist().index(returnMaxResultValue(seqA, seqB))
+    xArray = xArray.tolist()
 
     return xArray[destination]
 
@@ -124,16 +128,16 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
         plot the result. """
     ax = figure.add_subplot(gridSystem[plotRow, :])
 
-
     g = float("{0:.2f}".format(returnMaxResultValue(seqA, seqB)))
 
-    ax.set_title('Normalized Correlation results  -   Peak:' + str(g) + "at")
+    ax.set_title('Normalized Correlation results  -   Peak:' + str(g) + " at " + str(getXValueOfMax(seqA,seqB)))
     # Calculate the correlation, using the xcorr method from
     # the plot library [Normalizing the data]:
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=1500, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1, markeredgecolor='blue')
+             usevlines=False, maxlags=1500, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1,
+             markeredgecolor='blue')
     ax.grid(True)
     plotRow += 1
     return plotRow
@@ -226,7 +230,7 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         plt.show()
     if settings.exportToPdf:
         if settings.decidePdfPrinting:
-            if decidePdfPrint(seqASubtracted,seqBSubtracted):
+            if decidePdfPrint(seqASubtracted, seqBSubtracted):
                 figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
                 plt.close(figure)
         else:
