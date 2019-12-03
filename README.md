@@ -8,10 +8,17 @@ Kreuzkorrelationen von Maschinendaten
 - Maschinen mit einer geringen Anzahl an Zustandsänderunngen werden nun ignoriert
 - Höchster Peakwert + x-Achsen Angabe wird ausgegeben
 
+##### Übergabe von Parametern: 
+Aufruf: 
+> python automated_script.py [ORDNER der CSV Datei] [Sekundenbreite der Kreuzkorrelation]
+
+Beispielaufruf: 
+>python automated_script.py ./sourceFiles/ 1000
+
 
 TODO: 
 -
-- Übergabe verschiedenster Parameter über die Konsole
+
 - Automatisierte Kategorisierung von PDF Dateien im Dateisystem
 
 

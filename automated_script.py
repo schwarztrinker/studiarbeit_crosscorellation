@@ -15,9 +15,10 @@ def main():
     # Check if a argument for a folder path is provided
     if len(sys.argv) > 1:
         folderPath = sys.argv[1]
+        secondsWindow = int(sys.argv[2])
         if os.path.exists(folderPath):
             # Folder path found:
-            executedForFolderPath(folderPath)
+            executedForFolderPath(folderPath,secondsWindow)
             return
         else:
             raise FileNotFoundError(
@@ -36,7 +37,7 @@ def main():
     executedForFolderPath(directoryPath)
 
 
-def executedForFolderPath(path):
+def executedForFolderPath(path, secondsWindow):
     # Read the csv source files and expand them:
     filePathBatches = fileAccessFuntions.getFilePathBatches(path)
 
@@ -51,7 +52,7 @@ def executedForFolderPath(path):
         # executeCategorization(requests, False)
         # This will calculate the cross correlation between sequences in the same
         # source file. Additionally, the sequences must have the same length.
-        executeCrossCorrelationForDatasets(requests)
+        executeCrossCorrelationForDatasets(requests, secondsWindow)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import crosscorrelation.settings as crossSettings
 
+
 RASTERIZE_PLOTS = True
 
 
@@ -27,12 +28,12 @@ def returnMaxResultValue(seqA, seqB):
     return max(ccarray)
 
 
-def decidePdfPrint(seqA, seqB):
-    if returnMaxResultValue(seqA, seqB) >= 0.2:
-        print("Max value bigger 0.2 - > OK ...printing")
+def decidePdfPrint(seqA, seqB, value: float):
+    if returnMaxResultValue(seqA, seqB) >= value:
+        print("Max value bigger" + str(value) + " - > OK ...printing")
         return True
     else:
-        print("Max value smaller 0.2 - > NO")
+        print("Max value smaller " + str(value) + " - > NO")
         return False
 
 
@@ -122,7 +123,7 @@ def plotCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
 
 # DIESE FUNKTION WIRD AKTUELL ZUM PLOTTEN DER KREUZKORRALTION GENUTZT
 
-def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
+def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, secondsWindow):
     """ Takes a figure, the grid system in the figure, the row to plot to
         and two sequences to execute the correlation calculation and to
         plot the result. """
@@ -136,14 +137,14 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=1500, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1,
+             usevlines=False, maxlags=secondsWindow, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1,
              markeredgecolor='blue')
     ax.grid(True)
     plotRow += 1
     return plotRow
 
 
-def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname):
+def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname, secondsWindow):
     global seqASubtracted, seqBSubtracted
     plt.close("all")
     """ Calculate the cross correlation between two sequences. """
@@ -215,7 +216,7 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
                 figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted)
         if settings.plotNormalizedResults:
             currentPlotRow = plotNormalizedCorrelationResults(
-                figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted)
+                figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted, secondsWindow)
     else:
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
@@ -230,7 +231,7 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         plt.show()
     if settings.exportToPdf:
         if settings.decidePdfPrinting:
-            if decidePdfPrint(seqASubtracted, seqBSubtracted):
+            if decidePdfPrint(seqASubtracted, seqBSubtracted, 0.2):
                 figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
                 plt.close(figure)
         else:

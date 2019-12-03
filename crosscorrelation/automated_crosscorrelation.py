@@ -7,7 +7,7 @@ from analysationrequest.request import AnalysationRequest
 def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
     return metadataDictionary.get(key, '')
 
-def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest):
+def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow):
     """ Iterates the datasets and calaculates the cross correlation
         for suitable sequences """   
    
@@ -62,4 +62,4 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest):
                     correlationSettings.drawResults = False
                     # Execute the cross correlation:
                     fcc.crossCorrelation(firstSequence, secondSequence,
-                                         correlationSettings, str(titlePostfixFirst), str(titlePostfixSecond))
+                                         correlationSettings, str(titlePostfixFirst), str(titlePostfixSecond), secondsWindow)
