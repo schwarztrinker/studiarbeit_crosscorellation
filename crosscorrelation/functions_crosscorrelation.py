@@ -5,6 +5,16 @@ import crosscorrelation.settings as crossSettings
 
 RASTERIZE_PLOTS = True
 
+#X VALUE
+def getXValueOfMax(seqA, seqB):
+    xArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[0]
+    yArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=800, markersize=0)[1]
+
+
+    destination = yArray.tolist().index(returnMaxResultValue(seqA, seqB))
+
+    return xArray[destination]
+
 
 # NEUE FUNKTION UM DEN HÖCHSTEN WERT DES AUSGEGEBENEN ERGEBNISSES ZU ERFAHREN
 def returnMaxResultValue(seqA, seqB):
@@ -99,7 +109,7 @@ def plotCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=False,
-             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
+             usevlines=False, maxlags=1500, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
     ax.grid(True)
     ax.axhline(0, color='black', linewidth=1, zorder=1)
     plotRow += 1
@@ -114,15 +124,17 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
         plot the result. """
     ax = figure.add_subplot(gridSystem[plotRow, :])
 
-    ax.set_title('Normalized Correlation results')
+
+    g = float("{0:.2f}".format(returnMaxResultValue(seqA, seqB)))
+
+    ax.set_title('Normalized Correlation results  -   Peak:' + str(g) + "at")
     # Calculate the correlation, using the xcorr method from
     # the plot library [Normalizing the data]:
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1, markeredgecolor='blue')
+             usevlines=False, maxlags=1500, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1, markeredgecolor='blue')
     ax.grid(True)
-    ax.axhline(0, color='black', linewidth=1, zorder=1)
     plotRow += 1
     return plotRow
 
