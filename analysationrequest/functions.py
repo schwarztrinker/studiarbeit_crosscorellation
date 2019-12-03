@@ -113,7 +113,12 @@ def readRawDataFile(sourceFile: str) -> AnalysationRequest:
                 continue
 
             # Handle value row:
-            sequence = parseValueRow(row, sourceFile, rowIndex)
+            # NEU: Tagesdaten von Maschinen mit weniger als 4 Zustandsänderungen werden jetzt ignoriert
+            print(len(parseValueRow(row, sourceFile, rowIndex)))
+            if len(parseValueRow(row, sourceFile, rowIndex)) >= 4:
+                sequence = parseValueRow(row, sourceFile, rowIndex)
+            else:
+                continue
             # Sequence is finished, store it:
             source.rawSequences.append(sequence)
             # Extract the meta data from the previous row.
