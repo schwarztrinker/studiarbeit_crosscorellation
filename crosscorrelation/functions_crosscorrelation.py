@@ -28,7 +28,7 @@ def decidePdfPrint(seqA, seqB):
         print("Max value bigger 0.2 - > OK ...printing")
         return True
     else:
-        print("Max value smaller 0.2 - > NO ...printing")
+        print("Max value smaller 0.2 - > NO")
         return False
 
 
