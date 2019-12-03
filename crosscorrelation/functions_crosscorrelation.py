@@ -6,6 +6,22 @@ import crosscorrelation.settings as crossSettings
 RASTERIZE_PLOTS = True
 
 
+# NEUE FUNKTION UM DEN HÖCHSTEN WERT DES AUSGEGEBENEN ERGEBNISSES ZU ERFAHREN
+def returnMaxResultValue(seqA, seqB):
+    ccarray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
+                        usevlines=False, maxlags=800, markersize=0)[1]
+    return max(ccarray)
+
+
+def decidePdfPrint(seqA, seqB):
+    if returnMaxResultValue(seqA, seqB) >= 0.2:
+        print("Max value bigger 0.2 - > OK ...printing")
+        return True
+    else:
+        print("Max value smaller 0.2 - > NO ...printing")
+        return False
+
+
 def normalized(a, axis=-1, order=2):
     # See:
     # https://stackoverflow.com/questions/21030391/how-to-normalize-an-array-in-numpy
@@ -85,10 +101,12 @@ def plotCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=False,
              usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
     ax.grid(True)
-    ax.axhline(0, color='black',  linewidth=1, zorder=1)
+    ax.axhline(0, color='black', linewidth=1, zorder=1)
     plotRow += 1
     return plotRow
 
+
+# DIESE FUNKTION WIRD AKTUELL ZUM PLOTTEN DER KREUZKORRALTION GENUTZT
 
 def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     """ Takes a figure, the grid system in the figure, the row to plot to
@@ -102,16 +120,17 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
     # The function uses numpy.correlate() to calculate the results, see:
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.xcorr.html
     ax.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=1)
+             usevlines=False, maxlags=800, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1, markeredgecolor='blue')
     ax.grid(True)
-    ax.axhline(0, color='black',  linewidth=1, zorder=1)
+    ax.axhline(0, color='black', linewidth=1, zorder=1)
     plotRow += 1
     return plotRow
 
 
 def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname):
+    global seqASubtracted, seqBSubtracted
     plt.close("all")
-    """ Calculate the cross correlation between to sequences. """
+    """ Calculate the cross correlation between two sequences. """
     seqA = np.asarray(seqA)
     seqB = np.asarray(seqB)
     if len(seqA) != len(seqB):
@@ -190,9 +209,14 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
                 figure, gs, currentPlotRow, seqA, seqB)
 
     if settings.drawResults:
-        figure.canvas.set_window_title(settings.exportFilePath) 
+        figure.canvas.set_window_title(settings.exportFilePath)
         plt.draw()
         plt.show()
     if settings.exportToPdf:
-        figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
-        plt.close(figure)
+        if settings.decidePdfPrinting:
+            if decidePdfPrint(seqASubtracted,seqBSubtracted):
+                figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
+                plt.close(figure)
+        else:
+            figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
+            plt.close(figure)

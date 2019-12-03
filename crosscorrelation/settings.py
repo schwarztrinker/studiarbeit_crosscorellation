@@ -4,7 +4,7 @@ class Settings:
                  plotCorrelations=False, plotNonNormalizedResults=False,
                  plotNormalizedResults=True, subtractMeanFromResult=True,
                  drawResults=False, exportToPdf=False,
-                 exportFilePath=""):
+                 exportFilePath="", decidePdfPrinting=True):
         # If you want to adjust the settings and plot a lot of 
         # information, it is recommended to disable the pdf generation
         # and only to draw the results. Then choose the settings you need
@@ -18,3 +18,4 @@ class Settings:
         self.drawResults = drawResults
         self.exportToPdf = exportToPdf
         self.exportFilePath = exportFilePath
+        self.decidePdfPrinting = decidePdfPrinting
