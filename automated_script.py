@@ -12,13 +12,15 @@ import analysationrequest.functions as fileAccessFuntions
 
 
 def main():
+    secondsWindow: int = 600
     # Check if a argument for a folder path is provided
+
     if len(sys.argv) > 1:
         folderPath = sys.argv[1]
         secondsWindow = int(sys.argv[2])
         if os.path.exists(folderPath):
             # Folder path found:
-            executedForFolderPath(folderPath,secondsWindow)
+            executedForFolderPath(folderPath, secondsWindow)
             return
         else:
             raise FileNotFoundError(
@@ -34,7 +36,7 @@ def main():
     # Create the default folder if it does not exist:
     if not os.path.exists(directoryPath):
         os.makedirs(directoryPath)
-    executedForFolderPath(directoryPath)
+    executedForFolderPath(directoryPath, secondsWindow)
 
 
 def executedForFolderPath(path, secondsWindow):
