@@ -3,6 +3,7 @@
 sourceFiles/
 *.pyc
 *.bak
+.idea/
 categorization/__pycache__/
 
 analysationrequest/__pycache__/
