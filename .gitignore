@@ -3,3 +3,4 @@
 sourceFiles/
 *.pyc
 *.bak
+categorization/__pycache__/
