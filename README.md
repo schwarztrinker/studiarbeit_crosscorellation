@@ -13,15 +13,15 @@ Kreuzkorrelationen von Maschinendaten
 
 ##### Übergabe von Parametern: 
 Aufruf: 
-> python automated_script.py [ORDNER: der CSV Datei] [INT: Sekundenbreite der Kreuzkorrelation] [FLOAT: für Automatisches Aussortieren niederwertiger Korrelationen]
+> python automated_script.py [ORDNER: der CSV Datei] [INT: Sekundenbreite der Kreuzkorrelation] [FLOAT: Mindestwert der Korrelation für Automatisches Aussortieren niederwertiger Korrelationen]
 
 Beispielaufruf: 
->python automated_script.py ./sourceFiles 1000 1.5
+>python automated_script.py ./sourceFiles 1000 0.2
 
 
 TODO: 
 -
 - Automatisierte Kategorisierung von PDF Dateien im Dateisystem (große/kleine Bandbreite, wiederholende Frequenzen, etc.)
-
-
+- Performance Optimierungen
+- Auswertung des MaxValues zweier Maschinen in eine Datenbank um mehrere Tage einfacher vergleichen zu können
 
