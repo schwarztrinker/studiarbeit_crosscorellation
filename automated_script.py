@@ -13,14 +13,16 @@ import analysationrequest.functions as fileAccessFuntions
 
 def main():
     secondsWindow: int = 600
+    autoTrashPdfs: float = 0.0
     # Check if a argument for a folder path is provided
 
     if len(sys.argv) > 1:
         folderPath = sys.argv[1]
         secondsWindow = int(sys.argv[2])
+        autoTrashPdfs = float(sys.argv[3])
         if os.path.exists(folderPath):
             # Folder path found:
-            executedForFolderPath(folderPath, secondsWindow)
+            executedForFolderPath(folderPath, secondsWindow, autoTrashPdfs)
             return
         else:
             raise FileNotFoundError(
@@ -36,10 +38,10 @@ def main():
     # Create the default folder if it does not exist:
     if not os.path.exists(directoryPath):
         os.makedirs(directoryPath)
-    executedForFolderPath(directoryPath, secondsWindow)
+    executedForFolderPath(directoryPath, secondsWindow, autoTrashPdfs)
 
 
-def executedForFolderPath(path, secondsWindow):
+def executedForFolderPath(path, secondsWindow, autoTrashPdfs):
     # Read the csv source files and expand them:
     filePathBatches = fileAccessFuntions.getFilePathBatches(path)
 
@@ -54,7 +56,7 @@ def executedForFolderPath(path, secondsWindow):
         # executeCategorization(requests, False)
         # This will calculate the cross correlation between sequences in the same
         # source file. Additionally, the sequences must have the same length.
-        executeCrossCorrelationForDatasets(requests, secondsWindow)
+        executeCrossCorrelationForDatasets(requests, secondsWindow, autoTrashPdfs)
 
 
 if __name__ == "__main__":
