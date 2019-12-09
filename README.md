@@ -21,6 +21,7 @@ Beispielaufruf:
 
 TODO: 
 -
+- Umstellung der Args(Parameterübergabe) zu flags
 - Automatisierte Kategorisierung von PDF Dateien im Dateisystem (große/kleine Bandbreite, wiederholende Frequenzen, etc.)
 - Performance Optimierungen
 - Auswertung des MaxValues zweier Maschinen in eine Datenbank um mehrere Tage einfacher vergleichen zu können
