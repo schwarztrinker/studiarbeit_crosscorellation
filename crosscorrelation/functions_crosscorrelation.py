@@ -34,43 +34,73 @@ def getXValueOfMax(seqA, seqB, secondsWindow):
     return xArray[destination]
 
 
-def leftHalfVal(left, secondsWindow, yar, ymax):
-    i: int = left
-    while i >= -secondsWindow:
-        if yar[i] < (ymax*0.75):
+def leftHalfVal(ymaxdest, yar, value):
+    i: int = ymaxdest
+    while i >= 0:
+        if yar[i] <= value:
             return i
         else:
             i -= 1
-
-    return -secondsWindow
-
-
-def rightHalfVal(right, secondsWindow, yar, ymax):
-    while right <= secondsWindow:
-        right: int
-        if yar[right] < (ymax*0.75):
-            return right
-        else:
-            right += 1
             continue
 
-    return secondsWindow
+    return 0
+
+
+def rightHalfVal(ymaxdest, yar, value):
+    i: int = ymaxdest
+    while i <= len(yar)-1:
+        if yar[i] <= value:
+            return i
+        else:
+            i += 1
+            continue
+
+    return len(yar)-1
 
 
 def calcPeakScore(seqA, seqB, secondsWindow):
     # xar = getXArray(seqA, seqB)
     yar = getYArray(seqA, seqB, secondsWindow)
 
+
     ymax = returnMaxResultValue(seqA, seqB, secondsWindow)
-    ymaxdest = getXValueOfMax(seqA, seqB, secondsWindow)
+    ymaxdest = getXValueOfMax(seqA, seqB, secondsWindow) + secondsWindow -1
 
-    left: int = ymaxdest
-    lefty = leftHalfVal(left, secondsWindow, yar, ymax)
+    mean = np.mean(yar)
+    value = ymax*0.7
 
-    right: int = ymaxdest
-    righty = rightHalfVal(right, secondsWindow, yar, ymax)
+    leftx = leftHalfVal(ymaxdest,  yar, value)
 
-    print(lefty, righty)
+    rightx = rightHalfVal(ymaxdest,  yar, value)
+
+    if (rightx == len(yar)-1):
+        rightx -= 1
+
+    if(leftx == 0):
+        leftx = 1
+
+
+    print(leftx, rightx)
+
+
+    middleleftavg = np.mean(yar[leftx : ymaxdest])
+    middlerightavg = np.mean(yar[ymaxdest : rightx])
+
+    #valueScore = (((leftavg + rightavg)/2)-(ymax/2))/(ymax/2)
+    #print("VS:"+  str(valueScore))
+
+    leftAvg = np.mean(yar[0 : leftx])
+    rightAvg = np.mean(yar[rightx : len(yar)-1])
+    restAvg = (leftAvg+rightAvg)/2
+
+    avgScore = restAvg/((middleleftavg + middlerightavg)/2)
+    print("AS:"+  str(avgScore))
+
+    peakScore =  (rightx-leftx)/len(yar)
+    print("PS:"+ str(peakScore))
+
+    sumScore = (avgScore*0.5+peakScore*1.5)/2
+    return sumScore
 
 
 # NEUE FUNKTION UM DEN HÖCHSTEN WERT DES AUSGEGEBENEN ERGEBNISSES ZU ERFAHREN
@@ -181,12 +211,14 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, se
         plot the result. """
     ax = figure.add_subplot(gridSystem[plotRow, :])
 
-    g = float("{0:.2f}".format(returnMaxResultValue(seqA, seqB, secondsWindow)))
+    g = float("{0:.3f}".format(returnMaxResultValue(seqA, seqB, secondsWindow)))
 
-    calcPeakScore(seqA, seqB, secondsWindow)
+    peakScore = float("{0:.3f}".format(calcPeakScore(seqA, seqB, secondsWindow)))
+
+
 
     ax.set_title(
-        'Normalized Correlation results  -   Peak:' + str(g) + " at " + str(getXValueOfMax(seqA, seqB, secondsWindow)))
+        'Normalized Correlation results  -   Peak:' + "(" +  str(getXValueOfMax(seqA, seqB, secondsWindow))+ "/" + str(g) + ") " + "PkScore:" + str(peakScore))
     # Calculate the correlation, using the xcorr method from
     # the plot library [Normalizing the data]:
     # The function uses numpy.correlate() to calculate the results, see:
