@@ -82,6 +82,10 @@ def calcPeakScore(seqA, seqB, secondsWindow):
 
     print(leftx, rightx)
 
+    median = np.median(yar)
+    print(median)
+
+    
 
     middleleftavg = np.mean(yar[leftx : ymaxdest])
     middlerightavg = np.mean(yar[ymaxdest : rightx])
@@ -93,13 +97,17 @@ def calcPeakScore(seqA, seqB, secondsWindow):
     rightAvg = np.mean(yar[rightx : len(yar)-1])
     restAvg = (leftAvg+rightAvg)/2
 
-    avgScore = restAvg/((middleleftavg + middlerightavg)/2)
-    print("AS:"+  str(avgScore))
+    #avgScore = restAvg/((middleleftavg + middlerightavg)/2)
+    #print("AS:"+  str(avgScore))
 
-    peakScore =  (rightx-leftx)/len(yar)
-    print("PS:"+ str(peakScore))
+    #peakScore =  (rightx-leftx)/len(yar)
+    #print("PS:"+ str(peakScore))
 
-    sumScore = (avgScore*0.5+peakScore*1.5)/2
+    print("YMAX "+ str(ymax))
+    deltaMedianMaxScore = ymax-median
+    print("MS " + str(deltaMedianMaxScore))
+
+    sumScore = (ymax*0.5 + deltaMedianMaxScore*1.5)/2
     return sumScore
 
 
