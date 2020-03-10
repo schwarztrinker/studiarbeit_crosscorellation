@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-import crosscorrelation.settings as crossSettings
+import crosscorrelation.settings as crossSettings 
+import xlsxwriter as excel
 
 RASTERIZE_PLOTS = True
 
@@ -79,14 +80,6 @@ def calcPeakScore(seqA, seqB, secondsWindow):
     if(leftx == 0):
         leftx = 1
 
-
-    print(leftx, rightx)
-
-    median = np.median(yar)
-    print(median)
-
-    
-
     middleleftavg = np.mean(yar[leftx : ymaxdest])
     middlerightavg = np.mean(yar[ymaxdest : rightx])
 
@@ -103,11 +96,13 @@ def calcPeakScore(seqA, seqB, secondsWindow):
     #peakScore =  (rightx-leftx)/len(yar)
     #print("PS:"+ str(peakScore))
 
-    print("YMAX "+ str(ymax))
-    deltaMedianMaxScore = ymax-median
-    print("MS " + str(deltaMedianMaxScore))
+    #deltaModusMaxScore = ymax-modus
+    #print("MS " + str(deltaModusMaxScore))
 
-    sumScore = (ymax*0.5 + deltaMedianMaxScore*1.5)/2
+    meanScore = (ymax-mean)/ymax
+    #print("YMAX "+ str(ymax))
+
+    sumScore = (ymax*0.5 + meanScore*1.5)/2
     return sumScore
 
 
@@ -238,10 +233,10 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, se
     plotRow += 1
     return plotRow
 
-
+    
 def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname, secondsWindow,
-                     autoTrashPdfs):
-    global seqASubtracted, seqBSubtracted
+                     autoTrashPdfs, worksheet):
+    
     plt.close("all")
     """ Calculate the cross correlation between two sequences. """
     seqA = np.asarray(seqA)
@@ -333,3 +328,5 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         else:
             figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
             plt.close(figure)
+
+    return calcPeakScore(seqA, seqB, secondsWindow), returnMaxResultValue(seqA, seqB, secondsWindow), getXValueOfMax(seqA, seqB, secondsWindow) 

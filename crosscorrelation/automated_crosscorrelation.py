@@ -4,8 +4,15 @@ import analysationrequest.request as catData
 
 from analysationrequest.request import AnalysationRequest
 
+import xlsxwriter
+
+
 def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
     return metadataDictionary.get(key, '')
+
+def writeExcelBeginning(worksheet, name):
+    worksheet.write("A1", name)
+
 
 def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs):
     """ Iterates the datasets and calaculates the cross correlation
@@ -14,7 +21,16 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
     for dataset in datasets:
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
+
+            workbook = xlsxwriter.Workbook( dataset.fileName + "SUMMARY.xlsx")
+            worksheet = workbook.add_worksheet()
+
+            writeExcelBeginning(worksheet, "Summary for:" + dataset.fileName)
+
+            machineNameArray= []
+
             for firstIndex, firstSequence in enumerate(dataset.sequences):
+
                 for secondIdx, secondSequence in enumerate(dataset.sequences):
                     if secondIdx <= firstIndex:
                         continue
@@ -34,6 +50,10 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     titlePostfixSecond = \
                             extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
 
+                    
+                
+
+
                     startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
                     endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
 
@@ -46,8 +66,8 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                         + "_Sequence_" + str(titlePostfixSecond) + '_' +str(startTime) +".pdf")
 
 
-                    titlePostfixFirst = 'S:' + startTime + ' ' + titlePostfixFirst
-                    titlePostfixSecond = titlePostfixSecond + ' E:' +endTime
+                    titlePostfixFirstString = 'S:' + startTime + ' ' + titlePostfixFirst
+                    titlePostfixSecondString = titlePostfixSecond + ' E:' +endTime
 
 
 
@@ -60,6 +80,50 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     correlationSettings.exportToPdf = True
                     correlationSettings.exportFilePath = exportPath
                     correlationSettings.drawResults = False
+
+
                     # Execute the cross correlation:
-                    fcc.crossCorrelation(firstSequence, secondSequence,
-                                         correlationSettings, str(titlePostfixFirst), str(titlePostfixSecond), secondsWindow, autoTrashPdfs)
+                    PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
+                                         correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs, worksheet)
+
+                    
+                    machineNameArray.append([titlePostfixFirst, titlePostfixSecond, PeakScore, ymax, timeGap])
+            ### EXCEL SUMMARY! 
+
+            data_format_green = workbook.add_format({'bg_color': '#32CD32'})
+            data_format_lightgreen = workbook.add_format({'bg_color': '#98FB98'})
+            data_format_grey = workbook.add_format({'bg_color': '#A0A0A0'})
+                 
+            row= 2
+            col = 0
+            headline = ["Machine 1", "Machine 2", "Score", "Ymax", "TimeGap"]
+
+            for data in (headline):
+                worksheet.write(row, col, data, data_format_grey)
+                col +=1
+            
+            row = 2
+            col = 0    
+
+            lastMachineName = ""
+
+            for machineNameone, machineNametwo, score, ymax, timeGap in (machineNameArray):
+                if ymax <= 0.1:
+                    continue
+                if lastMachineName != machineNameone:
+                    row +=1
+                lastMachineName = machineNameone
+                worksheet.write(row, col, machineNameone)
+                worksheet.write(row, col + 1, machineNametwo)
+                worksheet.write(row, col + 2, score)
+                worksheet.write(row, col + 3, ymax)
+                worksheet.write(row, col + 4, timeGap)
+
+                if float(score) >= 0.2:
+                    worksheet.write(row, col + 2, score, data_format_lightgreen)
+                if float(score) >= 0.4:
+                    worksheet.write(row, col + 2, score, data_format_green)
+                row += 1
+
+            workbook.close()
+            

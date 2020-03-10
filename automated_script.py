@@ -7,6 +7,7 @@ from crosscorrelation.automated_crosscorrelation import (
 import analysationrequest.functions as fileAccessFuntions
 
 
+
 # You need the dependencies defined in "dependencies.txt" installed to run this
 # script.
 
@@ -35,10 +36,19 @@ def main():
     dirname = os.path.dirname(__file__)
     # Build the path for the source folder:
     directoryPath = os.path.join(dirname, 'sourceFiles')
+
+    
+    #worksheet.write('A1', 'Hello world')
+
+    
+
     # Create the default folder if it does not exist:
     if not os.path.exists(directoryPath):
         os.makedirs(directoryPath)
     executedForFolderPath(directoryPath, secondsWindow, autoTrashPdfs)
+
+    
+    
 
 
 def executedForFolderPath(path, secondsWindow, autoTrashPdfs):
