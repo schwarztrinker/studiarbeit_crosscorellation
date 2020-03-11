@@ -3,8 +3,10 @@ import crosscorrelation.functions_crosscorrelation as fcc
 import analysationrequest.request as catData
 
 from analysationrequest.request import AnalysationRequest
-
+import mysql.connector
 import xlsxwriter
+
+from datetime import datetime
 
 
 def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
@@ -14,18 +16,13 @@ def writeExcelBeginning(worksheet, name):
     worksheet.write("A1", name)
 
 
-def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs):
+def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs, tableName):
     """ Iterates the datasets and calaculates the cross correlation
         for suitable sequences """   
    
     for dataset in datasets:
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
-
-            workbook = xlsxwriter.Workbook( dataset.fileName + "SUMMARY.xlsx")
-            worksheet = workbook.add_worksheet()
-
-            writeExcelBeginning(worksheet, "Summary for:" + dataset.fileName)
 
             machineNameArray= []
 
@@ -86,44 +83,84 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
                                          correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs, worksheet)
 
-                    
-                    machineNameArray.append([titlePostfixFirst, titlePostfixSecond, PeakScore, ymax, timeGap])
-            ### EXCEL SUMMARY! 
-
-            data_format_green = workbook.add_format({'bg_color': '#32CD32'})
-            data_format_lightgreen = workbook.add_format({'bg_color': '#98FB98'})
-            data_format_grey = workbook.add_format({'bg_color': '#A0A0A0'})
-                 
-            row= 2
-            col = 0
-            headline = ["Machine 1", "Machine 2", "Score", "Ymax", "TimeGap"]
-
-            for data in (headline):
-                worksheet.write(row, col, data, data_format_grey)
-                col +=1
+                    datetime_object = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
             
-            row = 2
-            col = 0    
+                    date = str(datetime_object.date())
 
-            lastMachineName = ""
-
-            for machineNameone, machineNametwo, score, ymax, timeGap in (machineNameArray):
-                if ymax <= 0.1:
-                    continue
-                if lastMachineName != machineNameone:
-                    row +=1
-                lastMachineName = machineNameone
-                worksheet.write(row, col, machineNameone)
-                worksheet.write(row, col + 1, machineNametwo)
-                worksheet.write(row, col + 2, score)
-                worksheet.write(row, col + 3, ymax)
-                worksheet.write(row, col + 4, timeGap)
-
-                if float(score) >= 0.2:
-                    worksheet.write(row, col + 2, score, data_format_lightgreen)
-                if float(score) >= 0.4:
-                    worksheet.write(row, col + 2, score, data_format_green)
-                row += 1
-
-            workbook.close()
+                    machineNameArray.append([titlePostfixFirst, titlePostfixSecond, PeakScore, ymax, timeGap, secondsWindow, date])
             
+
+            ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
+            excelExport(dataset.fileName, machineNameArray)
+            sqlExport(tableName, machineNameArray)
+
+            
+            
+            
+
+def sqlExport(tableName, machineNameArray):
+    #SQL INJECT
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="123456",
+    database="crosscorr"
+    )
+
+    mycursor = mydb.cursor()
+
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date in (machineNameArray):
+        mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date)")
+        mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ("+machineNameone+", "+machineNametwo+", "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
+    mydb.commit()
+
+    mydb.close()
+
+
+
+def excelExport(fileName, machineNameArray):
+    workbook = xlsxwriter.Workbook(fileName + "SUMMARY.xlsx")
+    worksheet = workbook.add_worksheet()
+
+    writeExcelBeginning(worksheet, "Summary for:" + fileName)
+
+    ### EXCEL SUMMARY! 
+
+    data_format_green = workbook.add_format({'bg_color': '#32CD32'})
+    data_format_lightgreen = workbook.add_format({'bg_color': '#98FB98'})
+    data_format_grey = workbook.add_format({'bg_color': '#A0A0A0'})
+            
+    row= 2
+    col = 0
+    headline = ["Machine 1", "Machine 2", "Score", "Ymax", "TimeGap", "secondsWindow", "date"]
+
+    for data in (headline):
+        worksheet.write(row, col, data, data_format_grey)
+        col +=1
+    
+    row = 2
+    col = 0    
+
+    lastMachineName = ""
+
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date in (machineNameArray):
+        if ymax <= 0.1:
+            continue
+        if lastMachineName != machineNameone:
+            row +=1
+        lastMachineName = machineNameone
+        worksheet.write(row, col, machineNameone)
+        worksheet.write(row, col + 1, machineNametwo)
+        worksheet.write(row, col + 2, score)
+        worksheet.write(row, col + 3, ymax)
+        worksheet.write(row, col + 4, timeGap)
+        worksheet.write(row, col + 5, secondsWindow)
+        worksheet.write(row, col + 6, date)
+
+        if float(score) >= 0.2:
+            worksheet.write(row, col + 2, score, data_format_lightgreen)
+        if float(score) >= 0.4:
+            worksheet.write(row, col + 2, score, data_format_green)
+        row += 1
+
+    workbook.close()
