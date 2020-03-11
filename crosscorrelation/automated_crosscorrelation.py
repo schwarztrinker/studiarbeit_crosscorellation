@@ -81,7 +81,7 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
                     # Execute the cross correlation:
                     PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
-                                         correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs, worksheet)
+                                         correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs)
 
                     datetime_object = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
             
@@ -91,12 +91,10 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
             
 
             ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
-            excelExport(dataset.fileName, machineNameArray)
+
+            #excelExport(dataset.fileName, machineNameArray)
             sqlExport(tableName, machineNameArray)
 
-            
-            
-            
 
 def sqlExport(tableName, machineNameArray):
     #SQL INJECT
@@ -110,8 +108,20 @@ def sqlExport(tableName, machineNameArray):
     mycursor = mydb.cursor()
 
     for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date in (machineNameArray):
+        ## CHECK IF TABLE EXIST
         mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date)")
-        mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ("+machineNameone+", "+machineNametwo+", "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
+        
+        ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
+        mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1="+machineNameone+" AND machine2="+machineNametwo+" AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"')")
+        rowAlreadyExisting = mycursor.fetchall()
+        print(rowAlreadyExisting[0][0])
+        
+        if str(rowAlreadyExisting[0][0]) == "0":
+            ## INSERT THE ROW 
+            mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ("+machineNameone+", "+machineNametwo+", "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
+            ## REPLACE THE ROW WITH NEW CALCULATED SCORE ETC
+        else: print("row already exists")
+    
     mydb.commit()
 
     mydb.close()

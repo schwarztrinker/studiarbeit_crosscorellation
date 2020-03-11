@@ -235,7 +235,7 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, se
 
     
 def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname, secondsWindow,
-                     autoTrashPdfs, worksheet):
+                     autoTrashPdfs):
     
     plt.close("all")
     """ Calculate the cross correlation between two sequences. """
