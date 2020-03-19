@@ -87,8 +87,9 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
             
                     date = str(datetime_object.date())
 
-                    machineNameArray.append([titlePostfixFirst, titlePostfixSecond, PeakScore, ymax, timeGap, secondsWindow, date])
+                    machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date])
             
+            print(machineNameArray)
 
             ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
 
@@ -119,13 +120,13 @@ def sqlExport(tableName, machineNameArray):
         mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date)")
         
         ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
-        mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1="+machineNameone+" AND machine2="+machineNametwo+" AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"')")
+        mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"')")
         rowAlreadyExisting = mycursor.fetchall()
         print(rowAlreadyExisting[0][0])
         
-        if str(rowAlreadyExisting[0][0]) == "0":
+        if str(rowAlreadyExisting[0][0]) == "0":  
             ## INSERT THE ROW 
-            mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ("+machineNameone+", "+machineNametwo+", "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
+            mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ('"+machineNameone+"', '"+machineNametwo+"', "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
             ## REPLACE THE ROW WITH NEW CALCULATED SCORE ETC
         else: print("row already exists")
     
