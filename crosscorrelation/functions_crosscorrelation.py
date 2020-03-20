@@ -232,17 +232,6 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
     seqBNorm = normalized(seqB)[0]
 
 
-    ## CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
-    xcorrelation = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-             usevlines=False, maxlags=secondsWindow, linestyle='-', rasterized=RASTERIZE_PLOTS, markersize=0.5, lw=1,
-             markeredgecolor='blue')
-
-    xArray = xcorrelation[0] 
-    yArray = xcorrelation[1]
-    ymax = max(xcorrelation[1]) 
-
-
-
     # The number of rows which need to be plotted, depend
     # on the settings. Calculate the needed number of rows:
     if settings.plotNormalizedData:
@@ -292,6 +281,16 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         seqBSubtracted = seqB
         seqBMean = np.mean(seqB)
         seqBSubtracted[:] = [x - seqBMean for x in seqBSubtracted]
+
+        ##CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
+        xcorrelation = plt.xcorr(seqASubtracted.astype(float), seqBSubtracted.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
+                       markersize=0)
+
+        xArray = xcorrelation[0] 
+        yArray = xcorrelation[1]
+        ymax = max(xcorrelation[1]) 
+
+
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
                 figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted)
@@ -304,7 +303,7 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
                 figure, gs, currentPlotRow, seqA, seqB)
         if settings.plotNormalizedResults:
             currentPlotRow = plotNormalizedCorrelationResults(
-                figure, gs, currentPlotRow, seqA, seqB, secondsWindow)
+                figure, gs, currentPlotRow, seqA, seqB, secondsWindow, xcorrelation, xArray, yArray, ymax)
 
     if settings.drawResults:
         figure.canvas.set_window_title(settings.exportFilePath)
@@ -319,4 +318,4 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
             figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
             plt.close(figure)
 
-    return calcPeakScore(seqA, seqB, secondsWindow, xcorrelation), ymax, getXValueOfMax(seqA, seqB, secondsWindow, xArray, yArray, ymax) 
+    return calcPeakScore(seqASubtracted, seqBSubtracted, secondsWindow, xcorrelation), ymax, getXValueOfMax(seqASubtracted, seqBSubtracted, secondsWindow, xArray, yArray, ymax) 
