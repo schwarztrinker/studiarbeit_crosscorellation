@@ -85,18 +85,17 @@ def calcPeakScore(seqA, seqB, secondsWindow, xcorrelation):
     #print("YMAX "+ str(ymax))
 
     sumScore = (ymax*0.5 + meanScore*1.5)/2
-    return sumScore
-
+    return meanScore
 
 
 
 
 def decidePdfPrint(seqA, seqB, value: float, secondsWindow, ymax):
     if ymax >= value:
-        print("Max value bigger" + str(value) + " - > OK ...printing")
+        print("Max value bigger than " + str(value) + " - > PDF print")
         return True
     else:
-        print("Max value smaller " + str(value) + " - > NO")
+        print("Max value smaller " + str(value) + " - > no PDF print")
         return False
 
 

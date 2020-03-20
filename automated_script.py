@@ -15,7 +15,7 @@ import analysationrequest.functions as fileAccessFuntions
 def main():
     secondsWindow: int = 600
     autoTrashPdfs: float = 0.0
-    tableName: str = "u2"
+    tableName: str = "xCorrData"
     # Check if a argument for a folder path is provided
 
     if len(sys.argv) > 1:
@@ -39,10 +39,7 @@ def main():
     # Build the path for the source folder:
     directoryPath = os.path.join(dirname, 'sourceFiles')
 
-    
-    #worksheet.write('A1', 'Hello world')
 
-    
 
     # Create the default folder if it does not exist:
     if not os.path.exists(directoryPath):
