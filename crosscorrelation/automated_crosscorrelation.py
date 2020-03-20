@@ -83,11 +83,15 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
                                          correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs)
 
-                    datetime_object = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
-            
-                    date = str(datetime_object.date())
 
-                    machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date])
+                    ### Export Date and Times for SQL Export! 
+                    datetime_objectStart = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
+                    datetime_objectEnd = datetime.strptime(endTime, '%Y-%m-%d-%H-%M-%S')
+                    date = str(datetime_objectStart.date())
+                    timeStart = str(datetime_objectStart.time())
+                    timeEnd = str(datetime_objectEnd.time())
+
+                    machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
             
             print(machineNameArray)
 
@@ -115,18 +119,18 @@ def sqlExport(tableName, machineNameArray):
 
     mycursor = mydb.cursor()
 
-    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date in (machineNameArray):
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in (machineNameArray):
         ## CHECK IF TABLE EXIST
-        mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date)")
+        mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date, startTime TIME(0), endTime TIME(0))")
         
         ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
-        mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"')")
+        mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"' AND startTime='"+timeStart+"' AND endTime='"+timeEnd+"')")
         rowAlreadyExisting = mycursor.fetchall()
         print(rowAlreadyExisting[0][0])
         
         if str(rowAlreadyExisting[0][0]) == "0":  
             ## INSERT THE ROW 
-            mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate) VALUES ('"+machineNameone+"', '"+machineNametwo+"', "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"')")
+            mycursor.execute("INSERT INTO "+tableName+"(machine1, machine2, score, ymax, timeGap, timeWindow, timeDate, startTime, endTime) VALUES ('"+machineNameone+"', '"+machineNametwo+"', "+ str(score)+", "+str(ymax)+", "+str(timeGap)+", "+ str(secondsWindow)+", '"+date+"', '"+timeStart+"','"+timeEnd+"')")
             ## REPLACE THE ROW WITH NEW CALCULATED SCORE ETC
         else: print("row already exists")
     
@@ -150,7 +154,7 @@ def excelExport(fileName, machineNameArray):
             
     row= 2
     col = 0
-    headline = ["Machine 1", "Machine 2", "Score", "Ymax", "TimeGap", "secondsWindow", "date"]
+    headline = ["Machine 1", "Machine 2", "Score", "Ymax", "TimeGap", "secondsWindow", "date", "startTime", "endTime"]
 
     for data in (headline):
         worksheet.write(row, col, data, data_format_grey)
@@ -161,7 +165,7 @@ def excelExport(fileName, machineNameArray):
 
     lastMachineName = ""
 
-    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date in (machineNameArray):
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, startTime, endTime in (machineNameArray):
         if ymax <= 0.1:
             continue
         if lastMachineName != machineNameone:
@@ -174,6 +178,8 @@ def excelExport(fileName, machineNameArray):
         worksheet.write(row, col + 4, timeGap)
         worksheet.write(row, col + 5, secondsWindow)
         worksheet.write(row, col + 6, date)
+        worksheet.write(row, col + 7, startTime)
+        worksheet.write(row, col + 8, endTime)
 
         if float(score) >= 0.2:
             worksheet.write(row, col + 2, score, data_format_lightgreen)
