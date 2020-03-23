@@ -16,7 +16,7 @@ def main():
 
     #### SQL Abfrage
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM u1 where score>=0.3 and ymax>=0.3")
+    mycursor.execute("SELECT machine1, machine2, AVG(score), ymax, timeGap FROM u1 where score>=0.7 and ymax>=0.4 ORDER BY timeDate")
     	
     myresultArray = mycursor.fetchall()
 
@@ -35,12 +35,16 @@ def main():
         else: 
             G.add_edge(data[1], data[0], s=data[4])
 
-    pos = nx.spring_layout(G)
-    plt.figure()    
+    pos = nx.spring_layout(G,k=1,iterations=200)
+    figure = plt.figure()    
 
-    nx.draw(G,pos,edge_color='black',width=1,linewidths=1, node_size=100, node_color='grey',alpha=0.9, labels={node:node for node in G.nodes()})
+    nx.draw(G,pos,edge_color='black',width=1,linewidths=1, node_size=1000, node_color='grey',alpha=0.9, labels={node:node for node in G.nodes()})
 
     nx.draw_networkx_edge_labels(G,pos, font_color='black', font_size=6.0, font_family='sans-serif')
+
+
+    ####  PDF Plot
+    ###figure.savefig('./out.pdf', bbox_inches='tight', dpi=1000)
 
     plt.axis('off')
     plt.show()
