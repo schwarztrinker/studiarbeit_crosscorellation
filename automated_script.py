@@ -6,6 +6,10 @@ from crosscorrelation.automated_crosscorrelation import (
     executeCrossCorrelationForDatasets)
 import analysationrequest.functions as fileAccessFuntions
 
+import crosscorrelation.settings as crossSettings
+
+
+
 
 
 # You need the dependencies defined in "dependencies.txt" installed to run this
@@ -22,7 +26,9 @@ def main():
         folderPath = sys.argv[1]
         secondsWindow = int(sys.argv[2])
         autoTrashPdfs = float(sys.argv[3])
-        tableName = sys.argv[4]
+        if crossSettings.Settings().exportToMySql:
+            tableName = sys.argv[4]
+        else: print("SQL Export not activated")
         if os.path.exists(folderPath):
             # Folder path found:
             executedForFolderPath(folderPath, secondsWindow, autoTrashPdfs, tableName)
