@@ -4,7 +4,7 @@ class Settings:
                  plotCorrelations=False, plotNonNormalizedResults=False,
                  plotNormalizedResults=True, subtractMeanFromResult=True,
                  drawResults=False, exportToPdf=False,
-                 exportFilePath="", decidePdfPrinting=True):
+                 exportFilePath="", decidePdfPrinting=True, printExcelSummary=False, exportToMySql=True):
         # If you want to adjust the settings and plot a lot of 
         # information, it is recommended to disable the pdf generation
         # and only to draw the results. Then choose the settings you need
@@ -19,3 +19,5 @@ class Settings:
         self.exportToPdf = exportToPdf
         self.exportFilePath = exportFilePath
         self.decidePdfPrinting = decidePdfPrinting
+        self.printExcelSummary = printExcelSummary
+        self.exportToMySql = exportToMySql

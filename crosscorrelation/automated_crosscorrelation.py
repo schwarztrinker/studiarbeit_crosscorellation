@@ -96,15 +96,16 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
             print(machineNameArray)
 
             ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
+            if correlationSettings.printExcelSummary:
+                excelExport(dataset.fileName, machineNameArray)
 
-            #excelExport(dataset.fileName, machineNameArray)
-
-            #TRY : DATABASE ERROR
-            try:
-                sqlExport(tableName, machineNameArray)
-                pass
-            except mysql.connector.Error as err:
-                print("Database Export Error: {}".format(err))
+            if correlationSettings.exportToMySql:
+                #TRY : DATABASE ERROR
+                try:
+                    sqlExport(tableName, machineNameArray)
+                    pass
+                except mysql.connector.Error as err:
+                    print("Database Export Error: {}".format(err))
             
 
 
