@@ -82,9 +82,8 @@ def calcPeakScore(seqA, seqB, secondsWindow, xcorrelation):
     #print("MS " + str(deltaModusMaxScore))
 
     meanScore = (ymax-mean)/ymax
-    #print("YMAX "+ str(ymax))
 
-    sumScore = (ymax*0.5 + meanScore*1.5)/2
+    #sumScore = (ymax*0.5 + meanScore*1.5)/2
     return meanScore
 
 
