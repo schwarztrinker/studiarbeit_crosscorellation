@@ -114,7 +114,7 @@ def readRawDataFile(sourceFile: str) -> AnalysationRequest:
 
             # Handle value row:
             # NEU: Tagesdaten von Maschinen mit weniger als 4 Zustandsänderungen werden jetzt ignoriert
-            if len(parseValueRow(row, sourceFile, rowIndex)) >= 4:
+            if len(parseValueRow(row, sourceFile, rowIndex)) >= 0:
                 sequence = parseValueRow(row, sourceFile, rowIndex)
             else:
                 continue

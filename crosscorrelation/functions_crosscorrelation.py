@@ -273,12 +273,12 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
             figure, gs, currentPlotRow, seqANorm, seqBNorm)
 
     if settings.subtractMeanFromResult:
-        seqAMean = np.mean(seqA)
+        #seqAMean = np.mean(seqA)
         seqASubtracted = seqA
-        seqASubtracted[:] = [x - seqAMean for x in seqASubtracted]
+        #seqASubtracted[:] = [x - seqAMean for x in seqASubtracted]
         seqBSubtracted = seqB
-        seqBMean = np.mean(seqB)
-        seqBSubtracted[:] = [x - seqBMean for x in seqBSubtracted]
+        #seqBMean = np.mean(seqB)
+        #seqBSubtracted[:] = [x - seqBMean for x in seqBSubtracted]
 
         ##CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
         xcorrelation = plt.xcorr(seqASubtracted.astype(float), seqBSubtracted.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,

@@ -120,10 +120,11 @@ def sqlExport(tableName, machineNameArray):
 
     mycursor = mydb.cursor()
 
-    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in (machineNameArray):
-        ## CHECK IF TABLE EXIST
-        mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date, startTime TIME(0), endTime TIME(0))")
+    ## CHECK IF TABLE EXIST
+    mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date, startTime TIME(0), endTime TIME(0))")
         
+
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in (machineNameArray):
         ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
         mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"' AND startTime='"+timeStart+"' AND endTime='"+timeEnd+"')")
         rowAlreadyExisting = mycursor.fetchall()
