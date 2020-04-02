@@ -94,7 +94,6 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     if correlationSettings.saveCrossCorrIndicators:
                         machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
             
-            print(machineNameArray)
 
             ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
             if correlationSettings.printExcelSummary:
@@ -112,12 +111,7 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
 def sqlExport(tableName, machineNameArray):
     #SQL INJECT
-    mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    passwd="123456",
-    database="crosscorr"
-    )
+    mydb = crossSettings.Settings().sqlDatabaseCredentials
 
     mycursor = mydb.cursor()
 

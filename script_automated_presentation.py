@@ -2,17 +2,13 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 
+import crosscorrelation.settings as crossSettings
 
-import mysql.connector as sql
+import mysql.connector
 
 def main():
     ### DEFINITION DER ZUGANGSADTEN ZUR DB
-    mydb = sql.connect(
-    host="localhost",
-    user="root",
-    passwd="123456",
-    database="crosscorr"
-    )
+    mydb = crossSettings.Settings().sqlDatabaseCredentials
     
     #### SQL Abfrage
     mycursor = mydb.cursor()
