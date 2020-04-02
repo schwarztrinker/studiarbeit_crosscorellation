@@ -1,10 +1,18 @@
 class Settings:
     """ Contains setting parameters for the cross correlation """
     def __init__(self, plotNormalizedData=False,
-                 plotCorrelations=False, plotNonNormalizedResults=False,
-                 plotNormalizedResults=True, subtractMeanFromResult=True,
-                 drawResults=False, exportToPdf=False,
-                 exportFilePath="", decidePdfPrinting=True):
+                 plotCorrelations=False, 
+                 plotNonNormalizedResults=False,
+                 plotNormalizedResults=True, # !!  DEFAULT=True
+                 subtractMeanFromResult=True, # !!  DEFAULT=True
+                 drawResults=False, # Matlab output / if PDF True not needed 
+                 exportFilePath="", 
+                 exportToPdf=True, ## GENERAL BOOL ABOUT PDF PRINT
+                 decidePdfPrinting=True, ## IF BOOL ABOVE then DOUBLE between 0 and 1 in pyhton call
+                 printExcelSummary=False, # EXCEL  SUMMARY EXPORt 
+                 exportToMySql=True,  # SQL DATABASE EXPORT // CHANGE DB SETTINGS BEFORE EXPORT
+                 saveCrossCorrIndicators=True #NEEDS TO BE True for SQL OR EXCEL SUMMARY
+                 ):
         # If you want to adjust the settings and plot a lot of 
         # information, it is recommended to disable the pdf generation
         # and only to draw the results. Then choose the settings you need
@@ -19,3 +27,6 @@ class Settings:
         self.exportToPdf = exportToPdf
         self.exportFilePath = exportFilePath
         self.decidePdfPrinting = decidePdfPrinting
+        self.printExcelSummary = printExcelSummary
+        self.exportToMySql = exportToMySql
+        self.saveCrossCorrIndicators = saveCrossCorrIndicators

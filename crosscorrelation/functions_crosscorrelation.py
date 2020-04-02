@@ -6,29 +6,11 @@ import xlsxwriter as excel
 
 RASTERIZE_PLOTS = True
 
-
-def getXArray(seqA, seqB, secondsWindow):
-    xArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
-                       markersize=0)[
-        0]
-
-    return xArray
-
-
-def getYArray(seqA, seqB, secondsWindow):
-    yArray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
-                       markersize=0)[
-        1]
-
-    return yArray
-
-
+#
 # X VALUE
-def getXValueOfMax(seqA, seqB, secondsWindow):
-    xArray = getXArray(seqA, seqB, secondsWindow)
-    yArray = getYArray(seqA, seqB, secondsWindow)
+def getXValueOfMax(seqA, seqB, secondsWindow, xArray, yArray, ymax):
 
-    destination: int = yArray.tolist().index(returnMaxResultValue(seqA, seqB, secondsWindow))
+    destination: int = yArray.tolist().index(ymax)
 
     xArray = xArray.tolist()
 
@@ -59,13 +41,13 @@ def rightHalfVal(ymaxdest, yar, value):
     return len(yar)-1
 
 
-def calcPeakScore(seqA, seqB, secondsWindow):
+def calcPeakScore(seqA, seqB, secondsWindow, xcorrelation):
     # xar = getXArray(seqA, seqB)
-    yar = getYArray(seqA, seqB, secondsWindow)
+    xar = xcorrelation[0] 
+    yar = xcorrelation[1]
+    ymax = max(xcorrelation[1]) 
 
-
-    ymax = returnMaxResultValue(seqA, seqB, secondsWindow)
-    ymaxdest = getXValueOfMax(seqA, seqB, secondsWindow) + secondsWindow -1
+    ymaxdest = getXValueOfMax(seqA, seqB, secondsWindow, xar, yar, ymax) + secondsWindow -1
 
     mean = np.mean(yar)
     value = ymax*0.7
@@ -100,25 +82,19 @@ def calcPeakScore(seqA, seqB, secondsWindow):
     #print("MS " + str(deltaModusMaxScore))
 
     meanScore = (ymax-mean)/ymax
-    #print("YMAX "+ str(ymax))
 
-    sumScore = (ymax*0.5 + meanScore*1.5)/2
-    return sumScore
-
-
-# NEUE FUNKTION UM DEN HÖCHSTEN WERT DES AUSGEGEBENEN ERGEBNISSES ZU ERFAHREN
-def returnMaxResultValue(seqA, seqB, secondsWindow):
-    ccarray = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True,
-                        usevlines=False, maxlags=secondsWindow, markersize=0)[1]
-    return max(ccarray)
+    #sumScore = (ymax*0.5 + meanScore*1.5)/2
+    return meanScore
 
 
-def decidePdfPrint(seqA, seqB, value: float, secondsWindow):
-    if returnMaxResultValue(seqA, seqB, secondsWindow) >= value:
-        print("Max value bigger" + str(value) + " - > OK ...printing")
+
+
+def decidePdfPrint(seqA, seqB, value: float, secondsWindow, ymax):
+    if ymax >= value:
+        print("Max value bigger than " + str(value) + " - > PDF print")
         return True
     else:
-        print("Max value smaller " + str(value) + " - > NO")
+        print("Max value smaller " + str(value) + " - > no PDF print")
         return False
 
 
@@ -208,20 +184,20 @@ def plotCorrelationResults(figure, gridSystem, plotRow, seqA, seqB):
 
 # DIESE FUNKTION WIRD AKTUELL ZUM PLOTTEN DER KREUZKORRALTION GENUTZT
 
-def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, secondsWindow):
+def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, secondsWindow, xcorrelation, xArray, yArray, ymax):
     """ Takes a figure, the grid system in the figure, the row to plot to
         and two sequences to execute the correlation calculation and to
         plot the result. """
     ax = figure.add_subplot(gridSystem[plotRow, :])
 
-    g = float("{0:.3f}".format(returnMaxResultValue(seqA, seqB, secondsWindow)))
+    g = float("{0:.3f}".format(ymax))
 
-    peakScore = float("{0:.3f}".format(calcPeakScore(seqA, seqB, secondsWindow)))
+    peakScore = float("{0:.3f}".format(calcPeakScore(seqA, seqB, secondsWindow, xcorrelation)))
 
 
 
     ax.set_title(
-        'Normalized Correlation results  -   Peak:' + "(" +  str(getXValueOfMax(seqA, seqB, secondsWindow))+ "/" + str(g) + ") " + "PkScore:" + str(peakScore))
+        'Normalized Correlation results  -   Peak:' + "(" +  str(getXValueOfMax(seqA, seqB, secondsWindow, xArray, yArray, ymax))+ "/" + str(g) + ") " + "PkScore:" + str(peakScore))
     # Calculate the correlation, using the xcorr method from
     # the plot library [Normalizing the data]:
     # The function uses numpy.correlate() to calculate the results, see:
@@ -235,7 +211,7 @@ def plotNormalizedCorrelationResults(figure, gridSystem, plotRow, seqA, seqB, se
 
     
 def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAname, seqBname, secondsWindow,
-                     autoTrashPdfs, worksheet):
+                     autoTrashPdfs):
     
     plt.close("all")
     """ Calculate the cross correlation between two sequences. """
@@ -252,6 +228,7 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
     # Normalize the data:
     seqANorm = normalized(seqA)[0]
     seqBNorm = normalized(seqB)[0]
+
 
     # The number of rows which need to be plotted, depend
     # on the settings. Calculate the needed number of rows:
@@ -302,19 +279,40 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         seqBSubtracted = seqB
         seqBMean = np.mean(seqB)
         seqBSubtracted[:] = [x - seqBMean for x in seqBSubtracted]
+
+        ##CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
+        xcorrelation = plt.xcorr(seqASubtracted.astype(float), seqBSubtracted.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
+                       markersize=0)
+
+        xArray = xcorrelation[0] 
+        yArray = xcorrelation[1]
+        ymax = max(xcorrelation[1]) 
+
+        seqA = seqASubtracted
+        seqB = seqBSubtracted
+
+
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
                 figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted)
         if settings.plotNormalizedResults:
             currentPlotRow = plotNormalizedCorrelationResults(
-                figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted, secondsWindow)
+                figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted, secondsWindow, xcorrelation, xArray, yArray, ymax)
     else:
+        ##CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
+        xcorrelation = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
+                       markersize=0)
+
+        xArray = xcorrelation[0] 
+        yArray = xcorrelation[1]
+        ymax = max(xcorrelation[1]) 
+        ####
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
                 figure, gs, currentPlotRow, seqA, seqB)
         if settings.plotNormalizedResults:
             currentPlotRow = plotNormalizedCorrelationResults(
-                figure, gs, currentPlotRow, seqA, seqB, secondsWindow)
+                figure, gs, currentPlotRow, seqA, seqB, secondsWindow, xcorrelation, xArray, yArray, ymax)
 
     if settings.drawResults:
         figure.canvas.set_window_title(settings.exportFilePath)
@@ -322,11 +320,11 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         plt.show()
     if settings.exportToPdf:
         if settings.decidePdfPrinting:
-            if decidePdfPrint(seqASubtracted, seqBSubtracted, autoTrashPdfs, secondsWindow):
+            if decidePdfPrint(seqA, seqB, autoTrashPdfs, secondsWindow, ymax):
                 figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
                 plt.close(figure)
         else:
             figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
             plt.close(figure)
 
-    return calcPeakScore(seqA, seqB, secondsWindow), returnMaxResultValue(seqA, seqB, secondsWindow), getXValueOfMax(seqA, seqB, secondsWindow) 
+    return calcPeakScore(seqA, seqB, secondsWindow, xcorrelation), ymax, getXValueOfMax(seqA, seqB, secondsWindow, xArray, yArray, ymax) 

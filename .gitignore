@@ -4,6 +4,7 @@ sourceFiles/
 *.pyc
 *.bak
 .idea/
+.vscode/
 categorization/__pycache__/
 
 analysationrequest/__pycache__/
