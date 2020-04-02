@@ -5,6 +5,18 @@ Kreuzkorrelationen von Maschinendaten
 siehe Studienarbeit von Vulte und Stöcker 2020 Kapitel "Implementierung". 
 
 
+##### Installation von abhängigen Bibliotheken: 
+
+> pip install matplotlib
+
+> pip install numpy
+
+> pip install mysql-connector-python
+
+> pip install XlsxWriter
+
+> pip install networkx
+
 ##### Aufruf des "automated_script.py"  + Übergabe von Parametern: 
 Aufruf: 
 > python automated_script.py [ORDNER: der CSV Datei] [INT: Sekundenbreite der Kreuzkorrelation] [FLOAT: Mindestwert der Korrelation für Automatisches Aussortieren niederwertiger Korrelationen] [ggf. Name der Zieltabelle in einer SQL Datenbank]
