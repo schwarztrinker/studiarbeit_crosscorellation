@@ -19,7 +19,7 @@ def writeExcelBeginning(worksheet, name):
 def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs, tableName):
     """ Iterates the datasets and calaculates the cross correlation
         for suitable sequences """   
-   
+    
     for dataset in datasets:
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
@@ -90,8 +90,9 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                     date = str(datetime_objectStart.date())
                     timeStart = str(datetime_objectStart.time())
                     timeEnd = str(datetime_objectEnd.time())
-
-                    machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
+                    
+                    if correlationSettings.saveCrossCorrIndicators:
+                        machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
             
             print(machineNameArray)
 

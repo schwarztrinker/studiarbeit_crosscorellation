@@ -288,6 +288,9 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         yArray = xcorrelation[1]
         ymax = max(xcorrelation[1]) 
 
+        seqA = seqASubtracted
+        seqB = seqBSubtracted
+
 
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
@@ -296,6 +299,14 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
             currentPlotRow = plotNormalizedCorrelationResults(
                 figure, gs, currentPlotRow, seqASubtracted, seqBSubtracted, secondsWindow, xcorrelation, xArray, yArray, ymax)
     else:
+        ##CALCULATE XCORR AND SAVE IMPORTANT VARIABLES
+        xcorrelation = plt.xcorr(seqA.astype(float), seqB.astype(float), normed=True, usevlines=False, maxlags=secondsWindow,
+                       markersize=0)
+
+        xArray = xcorrelation[0] 
+        yArray = xcorrelation[1]
+        ymax = max(xcorrelation[1]) 
+        ####
         if settings.plotNonNormalizedResults:
             currentPlotRow = plotCorrelationResults(
                 figure, gs, currentPlotRow, seqA, seqB)
@@ -309,11 +320,11 @@ def crossCorrelation(seqA: [], seqB: [], settings: crossSettings.Settings, seqAn
         plt.show()
     if settings.exportToPdf:
         if settings.decidePdfPrinting:
-            if decidePdfPrint(seqASubtracted, seqBSubtracted, autoTrashPdfs, secondsWindow, ymax):
+            if decidePdfPrint(seqA, seqB, autoTrashPdfs, secondsWindow, ymax):
                 figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
                 plt.close(figure)
         else:
             figure.savefig(settings.exportFilePath, bbox_inches='tight', dpi=1000)
             plt.close(figure)
 
-    return calcPeakScore(seqASubtracted, seqBSubtracted, secondsWindow, xcorrelation), ymax, getXValueOfMax(seqASubtracted, seqBSubtracted, secondsWindow, xArray, yArray, ymax) 
+    return calcPeakScore(seqA, seqB, secondsWindow, xcorrelation), ymax, getXValueOfMax(seqA, seqB, secondsWindow, xArray, yArray, ymax) 
