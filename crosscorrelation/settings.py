@@ -13,7 +13,10 @@ class Settings:
                  decidePdfPrinting=True, ## IF BOOL ABOVE then DOUBLE between 0 and 1 in pyhton call
                  saveCrossCorrIndicators=True, #NEEDS TO BE True for SQL OR EXCEL SUMMARY
                  printExcelSummary=False, # EXCEL  SUMMARY EXPORt 
-                 exportToMySql=True # SQL DATABASE EXPORT // CHANGE DB SETTINGS BEFORE EXPORT
+                 exportToMySql=True, # SQL DATABASE EXPORT // CHANGE DB SETTINGS BEFORE EXPORT
+                 
+                 # SQL Credentials
+                 sqlDatabaseCredentials = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
                  ):
         # If you want to adjust the settings and plot a lot of 
         # information, it is recommended to disable the pdf generation
@@ -32,3 +35,4 @@ class Settings:
         self.printExcelSummary = printExcelSummary
         self.exportToMySql = exportToMySql
         self.saveCrossCorrIndicators = saveCrossCorrIndicators
+        self.sqlDatabaseCredentials = sqlDatabaseCredentials
