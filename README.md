@@ -24,11 +24,12 @@ Aufruf:
 Beispielaufruf: 
 >python automated_script.py ./sourceFiles 1000 0.2 u1Database
 
-##### Aufruf des "script_automated_presentation.py"  + Übergabe SQL Befehl : 
+##### Aufruf des "script_automated_presentation.py"  + Übergabe SQL Befehl (!!! SQL DATENBANK WIRD BENÖTIGT) : 
 
 Aufruf: 
 > python script_automated_presentation.py [ggf. SQL Befehl]
 
 Beispielaufruf: 
 > python script_automated_presentation.py "SELECT * FROM u1 WHERE score>=0.3 AND ymax>=0.3"
+
 

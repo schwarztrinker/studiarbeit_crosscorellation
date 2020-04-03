@@ -8,7 +8,7 @@ import mysql.connector
 
 def main():
     ### DEFINITION DER ZUGANGSADTEN ZUR DB
-    mydb = crossSettings.Settings().sqlDatabaseCredentials
+    mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
     
     #### SQL Abfrage
     mycursor = mydb.cursor()

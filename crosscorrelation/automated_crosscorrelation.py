@@ -111,7 +111,7 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
 def sqlExport(tableName, machineNameArray):
     #SQL INJECT
-    mydb = crossSettings.Settings().sqlDatabaseCredentials
+    mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
 
     mycursor = mydb.cursor()
 
