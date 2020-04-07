@@ -8,9 +8,11 @@ import xlsxwriter
 
 import os
 
-from multiprocessing import Process
+import multiprocessing
+
 
 from datetime import datetime
+
 
 
 def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
@@ -19,129 +21,140 @@ def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
 def writeExcelBeginning(worksheet, name):
     worksheet.write("A1", name)
 
-processes = [] 
 
 def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs, tableName):
     """ Iterates the datasets and calaculates the cross correlation
         for suitable sequences """  
-    
-    for i in range(os.cpu_count()): 
-        print('registering process %d' % i)
-        for dataset in datasets:
-            processes.append(Process(target=execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName)))
-    
-    for process in processes:
-        process.start()
-    
-    for process in processes:
-        process.join()
+    correlationSettings = crossSettings.Settings()
 
-def execute(dataset, secondsWindow, autoTrashPdfs, tableName): 
-    
+    for dataset in datasets:
+
+        machineNameArray = []
+        if correlationSettings.crossCorrProcessParallelisation:
+            manager = multiprocessing.Manager()
+            return_dict = manager.dict()
+
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
-
-            machineNameArray= []
-
+            
+            pool = multiprocessing.Pool()
+            
+            output = []
+            count = 0
             for firstIndex, firstSequence in enumerate(dataset.sequences):
-
                 for secondIdx, secondSequence in enumerate(dataset.sequences):
                     if secondIdx <= firstIndex:
                         continue
                     # Only sequences with the same length can be used:
                     if len(firstSequence) != len(secondSequence):
                         print(dataset.fileName,
-                              "Cross-Correlation between sequence",
-                              str(firstIndex), "and",
-                              str(secondIdx),
-                              "ignored. Sequence-Length not equal!")
+                            "Cross-Correlation between sequence",
+                            str(firstIndex), "and",
+                            str(secondIdx),
+                            "ignored. Sequence-Length not equal!")
                         continue
                     # Print information and create the export file path:
-                    metaDataInfo = dataset.metadataDictionaries[firstIndex]
-                    titlePostfixFirst = \
-                            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
-                    metaDataInfo = dataset.metadataDictionaries[secondIdx]
-                    titlePostfixSecond = \
-                            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
-
+                    if correlationSettings.crossCorrProcessParallelisation:
+                        pool.apply_async(execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count))
+                    else: output.append(execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, 0, 0))
+                    count +=1
                     
-                
+            if correlationSettings.crossCorrProcessParallelisation:
+                pool.close()
+                pool.join()
+
+        if correlationSettings.saveCrossCorrIndicators:
+            if correlationSettings.crossCorrProcessParallelisation:
+                machineNameArray = return_dict.values()
+            else: machineNameArray = output
+
+        ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
+        if correlationSettings.printExcelSummary:
+            excelExport(dataset.fileName, machineNameArray)
+
+        if correlationSettings.exportToMySql:
+            #TRY : DATABASE ERROR
+            try:
+                sqlExport(tableName, machineNameArray)
+                pass
+            except mysql.connector.Error as err:
+                print("Database Export Error: {}".format(err))
 
 
-                    startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
-                    endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
 
-                    print(dataset.fileName,
-                          "exporting Cross-Correlation between sequence",
-                          str(titlePostfixFirst), "and", str(titlePostfixSecond))
-                    exportPath = dataset.fileName.replace(
-                        ".csv",  "_CrossCorrelation_Sequence_" +
-                        str(titlePostfixFirst)
-                        + "_Sequence_" + str(titlePostfixSecond) + '_' +str(startTime) +".pdf")
+def execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count): 
+    
+    metaDataInfo = dataset.metadataDictionaries[firstIndex]
+    titlePostfixFirst = \
+            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
+    metaDataInfo = dataset.metadataDictionaries[secondIdx]
+    titlePostfixSecond = \
+            extractValueFromMetaDataDictionary(metaDataInfo, 'Machine')
 
+    
+    startTime = extractValueFromMetaDataDictionary(metaDataInfo, 'Start')
+    endTime = extractValueFromMetaDataDictionary(metaDataInfo, 'End')
 
-                    titlePostfixFirstString = 'S:' + startTime + ' ' + titlePostfixFirst
-                    titlePostfixSecondString = titlePostfixSecond + ' E:' +endTime
-
-
-
-                    # If you want to adjust the settings and plot a lot of 
-                    # information, it is recommended to disable the pdf generation
-                    # and only to draw the results. Then choose the settings you need
-                    # and enable pdf generation again. 
-                    # Reason: the space on a single PDF page is limited.
-                    correlationSettings = crossSettings.Settings()
-                    correlationSettings.exportToPdf = True
-                    correlationSettings.exportFilePath = exportPath
-                    correlationSettings.drawResults = False
+    print(dataset.fileName,
+            "exporting Cross-Correlation between sequence",
+            str(titlePostfixFirst), "and", str(titlePostfixSecond))
+    exportPath = dataset.fileName.replace(
+        ".csv",  "_CrossCorrelation_Sequence_" +
+        str(titlePostfixFirst)
+        + "_Sequence_" + str(titlePostfixSecond) + '_' +str(startTime) +".pdf")
 
 
-                    # Execute the cross correlation:
-                    
-                    
-                    PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
-                                         correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs)
-                
+    titlePostfixFirstString = 'S:' + startTime + ' ' + titlePostfixFirst
+    titlePostfixSecondString = titlePostfixSecond + ' E:' +endTime
 
-                    ### Export Date and Times for SQL Export! 
-                    datetime_objectStart = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
-                    datetime_objectEnd = datetime.strptime(endTime, '%Y-%m-%d-%H-%M-%S')
-                    date = str(datetime_objectStart.date())
-                    timeStart = str(datetime_objectStart.time())
-                    timeEnd = str(datetime_objectEnd.time())
-                    
-                    if correlationSettings.saveCrossCorrIndicators:
-                        machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
-            
 
-            ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
-            if correlationSettings.printExcelSummary:
-                excelExport(dataset.fileName, machineNameArray)
 
-            if correlationSettings.exportToMySql:
-                #TRY : DATABASE ERROR
-                try:
-                    sqlExport(tableName, machineNameArray)
-                    pass
-                except mysql.connector.Error as err:
-                    print("Database Export Error: {}".format(err))
-            
+    # If you want to adjust the settings and plot a lot of 
+    # information, it is recommended to disable the pdf generation
+    # and only to draw the results. Then choose the settings you need
+    # and enable pdf generation again. 
+    # Reason: the space on a single PDF page is limited.
+    correlationSettings = crossSettings.Settings()
+    correlationSettings.exportToPdf = True
+    correlationSettings.exportFilePath = exportPath
+    correlationSettings.drawResults = False
+
+
+    # Execute the cross correlation:
+    PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
+                            correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs)
+
+
+    ### Export Date and Times for SQL Export! 
+    datetime_objectStart = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
+    datetime_objectEnd = datetime.strptime(endTime, '%Y-%m-%d-%H-%M-%S')
+    date = str(datetime_objectStart.date())
+    timeStart = str(datetime_objectStart.time())
+    timeEnd = str(datetime_objectEnd.time())
+    
+    if correlationSettings.saveCrossCorrIndicators:
+        if correlationSettings.crossCorrProcessParallelisation:
+            return_dict[count] = [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+        else: return [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+
+    
 
 
 def sqlExport(tableName, machineNameArray):
+    print("---- SQL export ----") 
+
     #SQL INJECT
     mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
 
     mycursor = mydb.cursor()
 
-    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in (machineNameArray):
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in machineNameArray:
         ## CHECK IF TABLE EXIST
         mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date, startTime TIME(0), endTime TIME(0))")
         
         ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
         mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"' AND startTime='"+timeStart+"' AND endTime='"+timeEnd+"')")
         rowAlreadyExisting = mycursor.fetchall()
-        print(rowAlreadyExisting[0][0])
         
         if str(rowAlreadyExisting[0][0]) == "0":  
             ## INSERT THE ROW 
