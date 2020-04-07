@@ -6,6 +6,10 @@ from analysationrequest.request import AnalysationRequest
 import mysql.connector
 import xlsxwriter
 
+import os
+
+from multiprocessing import Process
+
 from datetime import datetime
 
 
@@ -15,12 +19,25 @@ def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
 def writeExcelBeginning(worksheet, name):
     worksheet.write("A1", name)
 
+processes = [] 
 
 def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, secondsWindow, autoTrashPdfs, tableName):
     """ Iterates the datasets and calaculates the cross correlation
-        for suitable sequences """   
+        for suitable sequences """  
     
-    for dataset in datasets:
+    for i in range(os.cpu_count()): 
+        print('registering process %d' % i)
+        for dataset in datasets:
+            processes.append(Process(target=execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName)))
+    
+    for process in processes:
+        process.start()
+    
+    for process in processes:
+        process.join()
+
+def execute(dataset, secondsWindow, autoTrashPdfs, tableName): 
+    
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
 
@@ -80,9 +97,11 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
 
                     # Execute the cross correlation:
+                    
+                    
                     PeakScore, ymax, timeGap = fcc.crossCorrelation(firstSequence, secondSequence,
                                          correlationSettings, str(titlePostfixFirstString), str(titlePostfixSecondString), secondsWindow, autoTrashPdfs)
-
+                
 
                     ### Export Date and Times for SQL Export! 
                     datetime_objectStart = datetime.strptime(startTime, '%Y-%m-%d-%H-%M-%S')
