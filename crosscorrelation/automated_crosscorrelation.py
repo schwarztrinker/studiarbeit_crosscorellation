@@ -30,14 +30,16 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
     for dataset in datasets:
 
         machineNameArray = []
-        manager = multiprocessing.Manager()
-        return_dict = manager.dict()
+        if correlationSettings.crossCorrProcessParallelisation:
+            manager = multiprocessing.Manager()
+            return_dict = manager.dict()
 
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
             
             pool = multiprocessing.Pool()
             
+            output = []
             count = 0
             for firstIndex, firstSequence in enumerate(dataset.sequences):
                 for secondIdx, secondSequence in enumerate(dataset.sequences):
@@ -52,15 +54,19 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                             "ignored. Sequence-Length not equal!")
                         continue
                     # Print information and create the export file path:
-                    pool.apply_async(execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count))
+                    if correlationSettings.crossCorrProcessParallelisation:
+                        pool.apply_async(execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count))
+                    else: output.append(execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, 0, 0))
                     count +=1
                     
-            
-            pool.close()
-            pool.join()
+            if correlationSettings.crossCorrProcessParallelisation:
+                pool.close()
+                pool.join()
 
         if correlationSettings.saveCrossCorrIndicators:
-            machineNameArray= return_dict.values()
+            if correlationSettings.crossCorrProcessParallelisation:
+                machineNameArray = return_dict.values()
+            else: machineNameArray = output
 
         ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
         if correlationSettings.printExcelSummary:
@@ -127,7 +133,11 @@ def execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, second
     timeEnd = str(datetime_objectEnd.time())
     
     if correlationSettings.saveCrossCorrIndicators:
-        return_dict[count] = [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+        if correlationSettings.crossCorrProcessParallelisation:
+            return_dict[count] = [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+        else: return [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+
+    
 
 
 def sqlExport(tableName, machineNameArray):
