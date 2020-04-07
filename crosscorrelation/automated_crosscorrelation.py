@@ -26,12 +26,12 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
         for suitable sequences """  
     correlationSettings = crossSettings.Settings()
 
-
-    machineNameArray = []
-    manager = multiprocessing.Manager()
-    return_dict = manager.dict()
-
     for dataset in datasets:
+
+        machineNameArray = []
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
 
@@ -61,20 +61,20 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
             pool.close()
             pool.join()
 
-    if correlationSettings.saveCrossCorrIndicators:
-        machineNameArray= return_dict.values()
+        if correlationSettings.saveCrossCorrIndicators:
+            machineNameArray= return_dict.values()
 
-    ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
-    if correlationSettings.printExcelSummary:
-        excelExport(dataset.fileName, machineNameArray)
+        ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
+        if correlationSettings.printExcelSummary:
+            excelExport(dataset.fileName, machineNameArray)
 
-    if correlationSettings.exportToMySql:
-        #TRY : DATABASE ERROR
-        try:
-            sqlExport(tableName, machineNameArray)
-            pass
-        except mysql.connector.Error as err:
-            print("Database Export Error: {}".format(err))
+        if correlationSettings.exportToMySql:
+            #TRY : DATABASE ERROR
+            try:
+                sqlExport(tableName, machineNameArray)
+                pass
+            except mysql.connector.Error as err:
+                print("Database Export Error: {}".format(err))
 
 
 
