@@ -10,6 +10,7 @@ import os
 
 import multiprocessing
 
+
 from datetime import datetime
 
 
@@ -34,9 +35,6 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
-
-            for i in range(os.cpu_count()): 
-                print('registering process %d' % i)
             
             pool = multiprocessing.Pool()
             
