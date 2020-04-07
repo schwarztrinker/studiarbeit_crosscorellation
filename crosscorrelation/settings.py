@@ -11,9 +11,9 @@ class Settings:
                  exportFilePath="", 
                  exportToPdf=True, ## GENERAL BOOL ABOUT PDF PRINT
                  decidePdfPrinting=True, ## IF BOOL ABOVE then DOUBLE between 0 and 1 in pyhton call
-                 saveCrossCorrIndicators=False, #NEEDS TO BE True for SQL OR EXCEL SUMMARY
+                 saveCrossCorrIndicators=True, #NEEDS TO BE True for SQL OR EXCEL SUMMARY
                  printExcelSummary=False, # EXCEL  SUMMARY EXPORt 
-                 exportToMySql=False # SQL DATABASE EXPORT // CHANGE DB SETTINGS BEFORE EXPORT
+                 exportToMySql=True # SQL DATABASE EXPORT // CHANGE DB SETTINGS BEFORE EXPORT
                  ):
         # If you want to adjust the settings and plot a lot of 
         # information, it is recommended to disable the pdf generation

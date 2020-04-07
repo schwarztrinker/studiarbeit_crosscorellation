@@ -13,6 +13,7 @@ import multiprocessing
 from datetime import datetime
 
 
+
 def extractValueFromMetaDataDictionary(metadataDictionary: {}, key):
     return metadataDictionary.get(key, '')
 
@@ -25,17 +26,21 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
         for suitable sequences """  
     correlationSettings = crossSettings.Settings()
 
-    
+
+    machineNameArray = []
+    manager = multiprocessing.Manager()
+    return_dict = manager.dict()
+
     for dataset in datasets:
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
 
-            machineNameArray= []
-
             for i in range(os.cpu_count()): 
                 print('registering process %d' % i)
+            
             pool = multiprocessing.Pool()
-                
+            
+            count = 0
             for firstIndex, firstSequence in enumerate(dataset.sequences):
                 for secondIdx, secondSequence in enumerate(dataset.sequences):
                     if secondIdx <= firstIndex:
@@ -49,11 +54,16 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
                             "ignored. Sequence-Length not equal!")
                         continue
                     # Print information and create the export file path:
-                    pool.apply_async(execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence))
+                    pool.apply_async(execute, args=(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count))
+                    count +=1
+                    
             
             pool.close()
             pool.join()
-    
+
+    if correlationSettings.saveCrossCorrIndicators:
+        machineNameArray= return_dict.values()
+
     ######## DATA EXPORTS IN EXCEL OR SQL DATABASE
     if correlationSettings.printExcelSummary:
         excelExport(dataset.fileName, machineNameArray)
@@ -68,7 +78,7 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
 
 
 
-def execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence): 
+def execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, secondIdx, firstSequence, secondSequence, return_dict, count): 
     
     metaDataInfo = dataset.metadataDictionaries[firstIndex]
     titlePostfixFirst = \
@@ -119,16 +129,18 @@ def execute(dataset, secondsWindow, autoTrashPdfs, tableName, firstIndex, second
     timeEnd = str(datetime_objectEnd.time())
     
     if correlationSettings.saveCrossCorrIndicators:
-        machineNameArray.append([str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd])
-            
+        return_dict[count] = [str(titlePostfixFirst), str(titlePostfixSecond), PeakScore, ymax, timeGap, secondsWindow, date, timeStart, timeEnd]
+
 
 def sqlExport(tableName, machineNameArray):
+    print("---- SQL export ----") 
+
     #SQL INJECT
     mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
 
     mycursor = mydb.cursor()
 
-    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in (machineNameArray):
+    for machineNameone, machineNametwo, score, ymax, timeGap, secondsWindow, date, timeStart, timeEnd in machineNameArray:
         ## CHECK IF TABLE EXIST
         mycursor.execute("CREATE TABLE IF NOT EXISTS "+tableName+"(machine1 varchar(255), machine2 varchar(255), score double, ymax double, timeGap int, timeWindow int, timeDate date, startTime TIME(0), endTime TIME(0))")
         
