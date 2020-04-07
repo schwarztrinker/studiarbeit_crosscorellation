@@ -9,6 +9,8 @@ import analysationrequest.functions as fileAccessFuntions
 import crosscorrelation.settings as crossSettings
 
 
+import time
+
 
 
 
@@ -22,6 +24,10 @@ def main():
     tableName: str = "xCorrData"
     # Check if a argument for a folder path is provided
 
+
+    start = time.time()
+
+
     if len(sys.argv) > 1:
         folderPath = sys.argv[1]
         secondsWindow = int(sys.argv[2])
@@ -32,11 +38,15 @@ def main():
         if os.path.exists(folderPath):
             # Folder path found:
             executedForFolderPath(folderPath, secondsWindow, autoTrashPdfs, tableName)
+            end = time.time()
+            print("Measured Time: " + str(end - start) + " seconds")
             return
         else:
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(
                     errno.ENOENT), folderPath)
+
+    
 
     # Folder path not provided or found. Use the default folder:
 

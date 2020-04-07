@@ -147,7 +147,6 @@ def sqlExport(tableName, machineNameArray):
         ## CHECK IF ROW ALREADY EXISTS   !!!!!!!!!!!(SCORING AND XCORR COULD HAVE CHANGED refresh for SCORE AND YMAX NEEDED)
         mycursor.execute("SELECT EXISTS(Select * from "+tableName+" WHERE machine1='"+machineNameone+"' AND machine2='"+machineNametwo+"' AND score="+ str(score)+" AND ymax="+str(ymax)+" AND timeWindow="+ str(secondsWindow)+" AND timeDate='"+date+"' AND startTime='"+timeStart+"' AND endTime='"+timeEnd+"')")
         rowAlreadyExisting = mycursor.fetchall()
-        print(rowAlreadyExisting[0][0])
         
         if str(rowAlreadyExisting[0][0]) == "0":  
             ## INSERT THE ROW 
