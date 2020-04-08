@@ -5,6 +5,7 @@ sourceFiles/
 *.bak
 .idea/
 .vscode/
+.vscode/
 categorization/__pycache__/
 
 analysationrequest/__pycache__/

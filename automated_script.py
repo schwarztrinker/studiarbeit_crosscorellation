@@ -8,12 +8,7 @@ import analysationrequest.functions as fileAccessFuntions
 
 import crosscorrelation.settings as crossSettings
 
-
 import time
-
-
-
-
 # You need the dependencies defined in "dependencies.txt" installed to run this
 # script.
 
@@ -61,6 +56,9 @@ def main():
     if not os.path.exists(directoryPath):
         os.makedirs(directoryPath)
     executedForFolderPath(directoryPath, secondsWindow, autoTrashPdfs, tableName)
+
+    end = time.time()
+    print("Measured Time: " + str(end - start) + " seconds")
 
     
     
