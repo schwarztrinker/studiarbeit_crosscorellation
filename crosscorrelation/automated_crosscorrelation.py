@@ -37,7 +37,8 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
             
-            pool = multiprocessing.Pool()
+            if correlationSettings.crossCorrProcessParallelisation:
+                pool = multiprocessing.Pool()
             
             output = []
             count = 0
