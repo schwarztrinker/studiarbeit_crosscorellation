@@ -37,9 +37,19 @@ def executeCrossCorrelationForDatasets(datasets: catData.AnalysationRequest, sec
         if len(dataset.sequences) >= 2:
             print("\nCrosscorrelation for file", dataset.fileName)
             
+            
             if correlationSettings.crossCorrProcessParallelisation:
-                if len(dataset.sequences) <= os.cpu_count():
-                    pool = multiprocessing.Pool(len(dataset.sequences))
+                ### Calculates count of possible seuquence combinations 
+                possibleCombinations = 0
+                m = len(dataset.sequences)
+                for n in range(1, m):
+                    possibleCombinations += m - n
+                else:
+                    print("Possible CrossCorr-Combinations: " + str(possibleCombinations))
+            
+                ### Creates Process Pool fpr given sequences
+                if possibleCombinations <= os.cpu_count():
+                    pool = multiprocessing.Pool(possibleCombinations)
                 else: pool = multiprocessing.Pool()
                 
             
@@ -148,7 +158,7 @@ def sqlExport(tableName, machineNameArray):
     print("---- SQL export ----") 
 
     #SQL INJECT
-    mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
+    mydb = mysql.connector.connect(host="127.0.0.1", user="root", passwd="123456", database="crosscorr")
 
     mycursor = mydb.cursor()
 
