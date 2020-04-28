@@ -158,7 +158,7 @@ def sqlExport(tableName, machineNameArray):
     print("---- SQL export ----") 
 
     #SQL INJECT
-    mydb = mysql.connector.connect(host="127.0.0.1", user="root", passwd="123456", database="crosscorr")
+    mydb = mysql.connector.connect(host="localhost", user="kimes", passwd="KI-MES20", database="crosscorr")
 
     mycursor = mydb.cursor()
 
