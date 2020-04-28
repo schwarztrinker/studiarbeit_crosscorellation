@@ -8,7 +8,8 @@ import mysql.connector
 
 def main():
     ### DEFINITION DER ZUGANGSADTEN ZUR DB
-    mydb = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="crosscorr")
+    mydb = mysql.connector.connect(host="localhost", user="kimes", passwd="KI-MES20", database="crosscorr")
+
     
     #### SQL Abfrage
     mycursor = mydb.cursor()
